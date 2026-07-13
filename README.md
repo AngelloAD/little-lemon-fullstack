@@ -92,8 +92,8 @@ Asegúrate de tener instalados los siguientes componentes en tu estación de tra
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com
-cd restaurant-project
+git clone https://github.com/AngelloAD/little-lemon-fullstack
+cd little-lemon-fullstack
 ```
 
 ### 2. Configurar el Backend (NestJS & PostgreSQL)
