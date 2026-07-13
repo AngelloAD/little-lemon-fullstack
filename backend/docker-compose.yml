@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: nombre_de_tu_nuevo_proyecto_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: tu_clave_secreta
+      POSTGRES_DB: mi_nueva_base_datos
+    ports:
+      - "5432:5432" # ⚠️ Recuerda cambiar el primer '5432' si usas múltiples proyectos a la vez
+    volumes:
+      - postgres_nuevo_data:/var/lib/postgresql/data
+volumes:
+  postgres_nuevo_data:

@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  CLIENTE
+  EMPLEADO
+}
+
+model Usuario {
+  id        Int       @id @default(autoincrement())
+  nombre    String    @unique
+  email     String    @unique
+  rol       Role      @default(CLIENTE)
+  password  String
+  ordenes   Orden[]
+  reservas  Reserva[]
+}
+
+model Orden {
+  id        Int      @id @default(autoincrement())
+  platillo  String
+  notas     String
+  estado    String   @default("Pendiente")
+  createdAt DateTime @default(now())
+
+  clienteId Int
+  cliente   Usuario  @relation(fields: [clienteId], references: [id])
+}
+
+model Menu {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  description String
+  category    String
+  image       String?
+  createdAt   DateTime @default(now())
+}
+
+model Reserva {
+  id               Int      @id @default(autoincrement())
+  date             String
+  time             String
+  number_of_people Int
+  special_requests String?
+  createdAt        DateTime @default(now())
+
+  clienteId        Int
+  cliente          Usuario  @relation(fields: [clienteId], references: [id])
+}
