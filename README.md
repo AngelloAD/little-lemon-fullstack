@@ -26,10 +26,11 @@ Este ecosistema ha sido desarrollado bajo una arquitectura desacoplada, utilizan
 
 ## 🛠️ Stack Tecnológico
 
-* **Frontend:** React 18, TypeScript, Tailwind CSS, React Hook Form, React Router DOM v6.
+* **Frontend:** React 18, TypeScript, Tailwind CSS, React Hook Form, React Router DOM (configurado con `HashRouter` para compatibilidad en Vercel).
 * **Backend:** NestJS, TypeScript, JWT (Passport Strategy), Bcrypt.
-* **Base de Datos & ORM:** PostgreSQL, Prisma ORM, Docker (Containerización).
+* **Base de Datos & ORM:** PostgreSQL Serverless (Neon), Prisma ORM.
 * **Entorno de Ejecución:** Node.js (V8 Engine).
+* **Infraestructura:** Despliegue Fullstack en Vercel (`vercel.json` unificado).
 
 ---
 
@@ -39,41 +40,68 @@ El proyecto implementa un monorepositorio conceptual dividido en dos arquitectur
 
 ```text
 restaurant-project/
+├── vercel.json               # Configuración unificada de enrutamiento y despliegue Fullstack
 ├── backend/                  # Arquitectura Modular con NestJS
 │   ├── src/
 │   │   ├── auth/             # Guardia de autenticación, JWT Strategy y Roles Decorator
+│   │   │   ├── decorators/
+│   │   │   ├── guards/
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.module.ts
+│   │   │   └── auth.service.ts
 │   │   ├── menu/             # Controlador y Servicios para el CRUD del catálogo
+│   │   │   ├── dto/
+│   │   │   ├── menu.controller.ts
+│   │   │   ├── menu.module.ts
+│   │   │   └── menu.service.ts
 │   │   ├── ordenes/          # Lógica de pedidos y agregaciones para estadísticas
+│   │   │   ├── ordenes.controller.ts
+│   │   │   ├── ordenes.module.ts
+│   │   │   └── ordenes.service.ts
 │   │   ├── prisma/           # Instancia global del PrismaService (Inyección de Dependencias)
+│   │   │   ├── prisma.module.ts
+│   │   │   └── prisma.service.ts
 │   │   ├── reservas/         # Gestión de reservas y control de comensales
+│   │   │   ├── reservas.controller.ts
+│   │   │   ├── reservas.module.ts
+│   │   │   └── reservas.service.ts
 │   │   ├── usuarios/         # Control de perfiles, enums de roles y semilla admin
-│   │   ├── main.ts           # Punto de entrada de la API REST
+│   │   │   ├── usuarios.controller.ts
+│   │   │   ├── usuarios.module.ts
+│   │   │   └── usuarios.service.ts
+│   │   └── main.ts           # Punto de entrada de la API REST
 │   ├── prisma/
-│   │   └── schema.prisma     # Definición de Modelos de Base de Datos y Enums nativos
+│   │   └── schema.prisma     # Definición de Modelos de Base de Datos (Neon compatible)
 │   ├── tsconfig.json         # Configuración del compilador TypeScript Backend
 │   └── .env.template         # Plantilla de variables de entorno del servidor
-│
-├── frontend/                 # SPA React con TypeScript
-│   ├── src/
-│   │   ├── components/       # Componentes estructurales (Navbar, Footer, ProtectedRoute)
-│   │   ├── context/          # Estados globales compartidos (AuthContext, CartContext)
-│   │   ├── pages/            # Vistas públicas y de autenticación del cliente
-│   │   │   ├── Home.tsx
-│   │   │   ├── Menu.tsx
-│   │   │   ├── Login.tsx
-│   │   │   ├── Register.tsx
-│   │   │   ├── Orders.tsx
-│   │   │   └── Reservations.tsx
-│   │   ├── pages/admin/      # Vistas protegidas por privilegios de administración
-│   │   │   ├── AdminDashboard.tsx
-│   │   │   ├── AdminMenu.tsx
-│   │   │   ├── AdminOrders.tsx
-│   │   │   ├── AdminReservations.tsx
-│   │   │   └── AdminUsers.tsx
-│   │   ├── services/         # Configuración central de Axios e interceptores HTTP
-│   │   ├── App.tsx           # Enrutador centralizado de la SPA
-│   │   └── main.tsx          # Punto de hidratación del DOM de React
-│   └── tsconfig.json         # Configuración del compilador TypeScript Frontend
+└── frontend/                 # SPA React con TypeScript
+    ├── src/
+    │   ├── components/       # Componentes estructurales (Navbar, Footer, ProtectedRoute)
+    │   │   ├── Navbar.tsx
+    │   │   ├── Footer.tsx
+    │   │   └── ProtectedRoute.tsx
+    │   ├── context/          # Estados globales compartidos (AuthContext, CartContext)
+    │   │   ├── AuthContext.tsx
+    │   │   └── CartContext.tsx
+    │   ├── pages/            # Vistas públicas y de autenticación del cliente
+    │   │   ├── Home.tsx
+    │   │   ├── Menu.tsx
+    │   │   ├── Login.tsx
+    │   │   ├── Register.tsx
+    │   │   ├── Orders.tsx
+    │   │   └── Reservations.tsx
+    │   ├── pages/admin/      # Vistas protegidas por privilegios de administración
+    │   │   ├── AdminDashboard.tsx
+    │   │   ├── AdminMenu.tsx
+    │   │   ├── AdminOrders.tsx
+    │   │   ├── AdminReservations.tsx
+    │   │   └── AdminUsers.tsx
+    │   ├── services/         # Configuración de Axios e interceptores HTTP
+    │   │   └── api.ts
+    │   ├── App.tsx           # Enrutador centralizado de la SPA utilizando HashRouter
+    │   └── main.tsx          # Punto de hidratación del DOM de React
+    └── tsconfig.json         # Configuración del compilador TypeScript Frontend
+
 ```
 
 ---
@@ -84,7 +112,6 @@ Asegúrate de tener instalados los siguientes componentes en tu estación de tra
 
 * **Node.js:** Versión v18 o superior.
 * **NPM:** Administrador de paquetes de Node (incluido por defecto).
-* **Docker Desktop:** Activo para inicializar la base de datos PostgreSQL de manera aislada.
 
 ---
 
@@ -103,30 +130,21 @@ cd backend
 npm install
 ```
 
-Crea un archivo `.env` basado en las variables requeridas en tu entorno de desarrollo local. Define la cadena de conexión de PostgreSQL apuntando a tu instancia de Docker o base de datos local:
-
+Crea un archivo `.env` basado en `.env.template` e introduce las credenciales de tu base de datos en la nube (Neon):
 ```env
-# Ejemplo de configuración local para Prisma y NestJS
-DATABASE_URL="postgresql://postgres:postgres123@localhost:5432/little_lemon_db?schema=public"
+DATABASE_URL="postgresql://usuario:password@ep-ligh-name.us-east-2.aws.neon.tech/little_lemon_db?sslmode=require"
 JWT_SECRET="SuperSecretKey_LittleLemon_2026_SeniorAsset"
 PORT=8000
 ```
-
-### 3. Levantar la Base de Datos en Docker
-Si deseas levantar PostgreSQL en un contenedor de manera inmediata, ejecuta:
-```bash
-docker run --name little-lemon-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres123 -e POSTGRES_DB=little_lemon_db -p 5432:5432 -d postgres
-```
-
-### 4. Ejecutar Migraciones y Generar Cliente de Prisma
-Aplica el esquema relacional en la base de datos PostgreSQL activa y genera los tipos estáticos para tu servicio:
+### 3. Ejecutar Migraciones de Prisma
+Aplica el esquema relacional a tu base de datos de Neon y genera el cliente local:
 ```bash
 npx prisma migrate dev --name init
 ```
-*(Nota: Al iniciar el backend por primera vez, el servicio ejecutará automáticamente una rutina interna (`ensureInitialAdmin`) que verificará e inyectará la cuenta del administrador principal si la tabla se encuentra vacía).*
+*(Nota: Al iniciar el backend por primera vez, el servicio ejecutará automáticamente una rutina interna (`ensureInitialAdmin`) que creará la cuenta del administrador si la tabla se encuentra vacía).*
 
-### 5. Configurar el Frontend (React)
-Abra una segunda terminal en el directorio raíz `restaurant-project` e ingrese al frontend:
+### 4. Configurar el Frontend (React)
+Abre otra terminal en la raíz del proyecto e ingresa al frontend:
 ```bash
 cd frontend
 npm install
@@ -134,17 +152,16 @@ npm install
 
 ---
 
-## 🏃‍♂️ Ejecución del Proyecto
+## 🏃‍♂️ Ejecución en Desarrollo
 
-Para ejecutar la aplicación completa en modo de desarrollo, levanta ambos servidores en terminales separadas:
+Para probar el proyecto de forma local, levanta ambos servidores en terminales independientes:
 
-### Ejecutar el Backend (Puerto asignado en .env o 8000 por defecto)
+### Backend
 ```bash
 cd backend
 npm run start:dev
 ```
-
-### Ejecutar el Frontend (Vite levantará la app en http://localhost:5173)
+### Frontend
 ```bash
 cd frontend
 npm run dev
@@ -152,15 +169,24 @@ npm run dev
 
 ---
 
+## 🚀 Despliegue en Vercel
+
+El proyecto está configurado para desplegarse de manera conjunta usando el archivo `vercel.json` en la raíz. 
+
+1. Asegúrate de configurar las **Variables de Entorno** (`DATABASE_URL`, `JWT_SECRET`) directamente en el panel de control del proyecto en Vercel.
+2. La aplicación utiliza `HashRouter` en el Frontend para asegurar que las rutas internas de React funcionen correctamente sin generar errores 404 al recargar el navegador en producción.
+
+---
+
 ## 🔑 Credenciales de Demostración
 
-La base de datos se inicializa automáticamente con una cuenta de Superadministrador para pruebas inmediatas de los módulos protegidos y el control de accesos.
+La base de datos se inicializa automáticamente con una cuenta de Superadministrador para pruebas inmediatas de los módulos protegidos.
 
 | Campo | Credencial | Descripción |
 | :--- | :--- | :--- |
 | **Rol** | `ADMIN` | Privilegios globales de lectura/escritura |
 | **Usuario** | `admin` | Identificador único de acceso |
-| **Contraseña** | `admin123` | Clave hash preestablecida en servidor |
+| **Contraseña** | `admin123` | Clave preestablecida en el servidor |
 
 ---
 Desarrollado con enfoque en la excelencia de ingeniería de software. 🍋
