@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 
 // const baseURL: string = (import.meta.env.VITE_API_URL as string) || 'http://127.0.0.1:8000/api/';
-const baseURL: string = (import.meta.env.VITE_API_URL as string) || '/api/';
+const baseURL: string = (import.meta.env.VITE_API_URL as string) || '/api';
 
 
 const API = axios.create({
